@@ -167,6 +167,27 @@ class StackelbergPPOAgent(BaseAgent):
         
         return leader_action, follower1_action, follower2_action
     
+    def compute_gae(self, rewards, values, dones):
+        """
+        Compute Generalized Advantage Estimation.
+        """
+        advantages = torch.zeros_like(rewards)
+        last_gae_lam = 0
+        next_value = values[-1]  # Bootstrap with last value
+        
+        for t in reversed(range(len(rewards))):
+            if t == len(rewards) - 1:
+                next_non_terminal = 1.0 - dones[t]
+                next_val = next_value
+            else:
+                next_non_terminal = 1.0 - dones[t]
+                next_val = values[t + 1]
+            
+            delta = rewards[t] + self.gamma * next_val * next_non_terminal - values[t]
+            advantages[t] = last_gae_lam = delta + self.gamma * self.gae_lambda * next_non_terminal * last_gae_lam
+        
+        return advantages
+    
     def act(self, state: np.ndarray, action_masks: Optional[Dict[str, np.ndarray]] = None, 
             deterministic: bool = False) -> Tuple[int, int, int]:
         """

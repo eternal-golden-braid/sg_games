@@ -162,29 +162,94 @@ class StackelbergThreeRobotDRQNAgent:
         self.follower1_hidden = None
         self.follower2_hidden = None
     
-    def act(self, state, epsilon=None):
+    def compute_stackelberg_equilibrium_from_q_values(self, leader_q_values, follower1_q_values, follower2_q_values):
         """
-        Select actions according to epsilon-greedy policy.
+        Compute Stackelberg equilibrium using pre-computed Q-values.
         
         Parameters:
-        - state: Current environment state
-        - epsilon: Exploration rate (uses default if None)
+        - leader_q_values: Leader's Q-values tensor
+        - follower1_q_values: Follower1's Q-values tensor
+        - follower2_q_values: Follower2's Q-values tensor
         
         Returns:
-        - leader_action, follower1_action, follower2_action: Selected actions
+        - leader_action, follower1_action, follower2_action: Equilibrium actions
         """
+        # Convert Q-values to numpy for easier manipulation
+        leader_q = leader_q_values.detach().cpu().numpy()
+        follower1_q = follower1_q_values.detach().cpu().numpy()
+        follower2_q = follower2_q_values.detach().cpu().numpy()
+        
+        # For each potential leader action, compute the Nash equilibrium between the followers
+        best_leader_value = float('-inf')
+        leader_se_action = 0
+        follower1_se_action = 0
+        follower2_se_action = 0
+        
+        for a_l in range(self.action_dim_leader):
+            # For this leader action, find the equilibrium between followers
+            # Initialize with a suboptimal solution
+            f1_action, f2_action = 0, 0
+            
+            # Simple iterative best response for the followers' subgame
+            for _ in range(10):  # Few iterations usually converge
+                # Follower 1's best response to current follower 2's action
+                f1_best_response = np.argmax(follower1_q[a_l, :, f2_action])
+                
+                # Follower 2's best response to updated follower 1's action
+                f2_best_response = np.argmax(follower2_q[a_l, f1_best_response, :])
+                
+                # Update actions
+                if f1_action == f1_best_response and f2_action == f2_best_response:
+                    break  # Equilibrium reached
+                    
+                f1_action, f2_action = f1_best_response, f2_best_response
+            
+            # Evaluate leader's utility with this followers' equilibrium
+            leader_value = leader_q[a_l, f1_action, f2_action]
+            
+            if leader_value > best_leader_value:
+                best_leader_value = leader_value
+                leader_se_action = a_l
+                follower1_se_action = f1_action
+                follower2_se_action = f2_action
+        
+        # Convert from index to actual action (-1 to n-2, where n is action_dim)
+        return leader_se_action - 1, follower1_se_action - 1, follower2_se_action - 1
+    
+    def act(self, state, epsilon=None):
+        """Select actions with proper state handling."""
+        # Handle raw state from environment
+        if isinstance(state, np.ndarray):
+            state_tensor = torch.FloatTensor(state).to(self.device)
+            if len(state_tensor.shape) == 1:
+                state_tensor = state_tensor.unsqueeze(0).unsqueeze(0)  # Add batch and sequence dims
+            elif len(state_tensor.shape) == 2:
+                state_tensor = state_tensor.unsqueeze(0)  # Add batch dim
+        else:
+            # Already a tensor
+            state_tensor = state.to(self.device)
+            if len(state_tensor.shape) == 1:
+                state_tensor = state_tensor.unsqueeze(0).unsqueeze(0)
+            elif len(state_tensor.shape) == 2:
+                state_tensor = state_tensor.unsqueeze(0)
+        
+        # Get action using epsilon-greedy approach
         if epsilon is None:
             epsilon = self.epsilon
         
-        # With probability epsilon, select random actions
         if np.random.random() < epsilon:
             leader_action = np.random.randint(-1, self.action_dim_leader - 1)
             follower1_action = np.random.randint(-1, self.action_dim_follower1 - 1)
             follower2_action = np.random.randint(-1, self.action_dim_follower2 - 1)
             return leader_action, follower1_action, follower2_action
         
-        # Otherwise, compute and return Stackelberg equilibrium actions
-        return self.compute_stackelberg_equilibrium(state)
+        # Use policy to select actions
+        leader_q_values, self.leader_hidden = self.leader_online.get_q_values(state_tensor, self.leader_hidden)
+        follower1_q_values, self.follower1_hidden = self.follower1_online.get_q_values(state_tensor, self.follower1_hidden)
+        follower2_q_values, self.follower2_hidden = self.follower2_online.get_q_values(state_tensor, self.follower2_hidden)
+        
+        # Compute Stackelberg equilibrium
+        return self.compute_stackelberg_equilibrium_from_q_values(leader_q_values, follower1_q_values, follower2_q_values)
     
     def update(self, experiences):
         """

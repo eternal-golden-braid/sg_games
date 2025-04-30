@@ -1,6 +1,8 @@
 import torch
 import torch.nn as nn
-
+from typing import Tuple
+from torch.distributions import Categorical
+import torch.nn.functional as F
 
 class PPONetwork(nn.Module):
     """

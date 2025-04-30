@@ -74,7 +74,7 @@ class StackelbergThreeRobotDRQNSimulation:
         }
     
     def generate_initial_buffer(self, n_episodes=10):
-        """
+        """git pull origin master
         Generate initial experiences using random actions.
         
         Parameters:

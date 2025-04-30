@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import matplotlib
 matplotlib.use('TkAgg')  # You can also try 'Agg' for non-interactive use
-from config.simulation import StackelbergThreeRobotDRQNSimulation
+from config.simulation_drqn import StackelbergThreeRobotDRQNSimulation
 
 def run_three_robot_drqn_simulation():
     """
@@ -26,9 +26,9 @@ def run_three_robot_drqn_simulation():
         'hidden_size': 64,
         'learning_rate': 1e-4,
         'gamma': 0.9,
-        'epsilon': 0.5,
-        'epsilon_decay': 0.995,
-        'epsilon_min': 0.05,
+        'epsilon': 0.5,          # Start with higher exploration (was 0.1)
+    'epsilon_decay': 0.9998, # Much slower decay (was 0.995)
+    'epsilon_min': 0.05,     # Keep reasonable exploration (was 0.001
         'tau': 0.01
     }
     
