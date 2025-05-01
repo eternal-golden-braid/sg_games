@@ -311,15 +311,15 @@ class StackelbergThreeRobotDRQNAgent:
             dones.append(seq_dones)
         
         # Convert to tensors
-        states = torch.tensor(states, dtype=torch.float).to(self.device)
-        leader_actions = torch.tensor(leader_actions, dtype=torch.long).to(self.device)
-        follower1_actions = torch.tensor(follower1_actions, dtype=torch.long).to(self.device)
-        follower2_actions = torch.tensor(follower2_actions, dtype=torch.long).to(self.device)
-        leader_rewards = torch.tensor(leader_rewards, dtype=torch.float).to(self.device)
-        follower1_rewards = torch.tensor(follower1_rewards, dtype=torch.float).to(self.device)
-        follower2_rewards = torch.tensor(follower2_rewards, dtype=torch.float).to(self.device)
-        next_states = torch.tensor(next_states, dtype=torch.float).to(self.device)
-        dones = torch.tensor(dones, dtype=torch.float).to(self.device)
+        states = torch.tensor(np.array(states), dtype=torch.float).to(self.device)
+        leader_actions = torch.tensor(np.array(leader_actions), dtype=torch.long).to(self.device)
+        follower1_actions = torch.tensor(np.array(follower1_actions), dtype=torch.long).to(self.device)
+        follower2_actions = torch.tensor(np.array(follower2_actions), dtype=torch.long).to(self.device)
+        leader_rewards = torch.tensor(np.array(leader_rewards), dtype=torch.float).to(self.device)
+        follower1_rewards = torch.tensor(np.array(follower1_rewards), dtype=torch.float).to(self.device)
+        follower2_rewards = torch.tensor(np.array(follower2_rewards), dtype=torch.float).to(self.device)
+        next_states = torch.tensor(np.array(next_states), dtype=torch.float).to(self.device)
+        dones = torch.tensor(np.array(dones), dtype=torch.float).to(self.device)
         
         batch_size, seq_len = states.shape[0], states.shape[1]
         

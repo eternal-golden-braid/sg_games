@@ -30,7 +30,7 @@ def run_comparison():
     
     # Create simulation instances
     print("Initializing simulations...")
-    # drqn_sim = StackelbergThreeRobotDRQNSimulation({**base_params, 'seed': 42})
+    drqn_sim = StackelbergThreeRobotDRQNSimulation({**base_params, 'seed': 42})
     rainbow_sim = StackelbergRainbowSimulation({**base_params, 'seed': 43})
     ppo_sim = StackelbergPPOSimulation({**base_params, 'seed': 44})
     sac_sim = StackelbergSACSimulation({**base_params, 'seed': 45})
@@ -38,8 +38,8 @@ def run_comparison():
     # Train all agents
     n_episodes = 200  # Short training for comparison
     
-    # print("Training DRQN agent...")
-    # drqn_stats = drqn_sim.train(n_episodes=n_episodes)
+    print("Training DRQN agent...")
+    drqn_stats = drqn_sim.train(n_episodes=n_episodes)
     
     print("Training Rainbow agent...")
     rainbow_stats = rainbow_sim.train(n_episodes=n_episodes)
@@ -53,8 +53,8 @@ def run_comparison():
     # Evaluate all agents
     print("\nEvaluating all agents...")
     
-    # print("Evaluating DRQN agent...")
-    # drqn_eval = drqn_sim.evaluate(n_episodes=10)
+    print("Evaluating DRQN agent...")
+    drqn_eval = drqn_sim.evaluate(n_episodes=10)
     
     print("Evaluating Rainbow agent...")
     rainbow_eval = rainbow_sim.evaluate(n_episodes=10)
@@ -66,14 +66,14 @@ def run_comparison():
     sac_eval = sac_sim.evaluate(n_episodes=10)
     
     # Compare results
-    # stats_list = [drqn_stats, rainbow_stats, ppo_stats, sac_stats]
-    # eval_list = [drqn_eval, rainbow_eval, ppo_eval, sac_eval]
-    # names = ["DRQN", "Rainbow", "PPO", "SAC"]
+    stats_list = [drqn_stats, rainbow_stats, ppo_stats, sac_stats]
+    eval_list = [drqn_eval, rainbow_eval, ppo_eval, sac_eval]
+    names = ["DRQN", "Rainbow", "PPO", "SAC"]
 
     # Compare results
-    stats_list = [rainbow_stats, ppo_stats, sac_stats]
-    eval_list = [rainbow_eval, ppo_eval, sac_eval]
-    names = ["Rainbow", "PPO", "SAC"]
+    # stats_list = [rainbow_stats, ppo_stats, sac_stats]
+    # eval_list = [rainbow_eval, ppo_eval, sac_eval]
+    # names = ["Rainbow", "PPO", "SAC"]
     
     # Save comparison results
     save_comparison_results(stats_list, eval_list, names)

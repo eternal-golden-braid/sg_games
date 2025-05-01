@@ -30,14 +30,12 @@ class StackelbergSACSimulation:
             action_dim_follower1=action_dim_follower1,
             action_dim_follower2=action_dim_follower2,
             hidden_size=parameters.get('hidden_size', 64),
-            device=self.device,
             learning_rate=parameters.get('learning_rate', 3e-4),
             gamma=parameters.get('gamma', 0.99),
             tau=parameters.get('tau', 0.005),
             alpha=parameters.get('alpha', 0.2),
             target_update_interval=parameters.get('target_update_interval', 1),
-            automatic_entropy_tuning=parameters.get('automatic_entropy_tuning', True),
-            seed=parameters.get('seed', 42)
+            automatic_entropy_tuning=parameters.get('automatic_entropy_tuning', True)
         )
         
         # Store batch size
